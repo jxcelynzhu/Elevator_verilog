@@ -6,7 +6,7 @@
 `default_nettype none
 
 
-module elevator_output (
+module tt_um_elevator_output (
   input  wire [7:0] ui_in,    // Dedicated inputs: User-selected floor
   output wire [3:0] uo_out,   // Dedicated outputs: Currently accessed floor
   input  wire [3:0] uio_in,   // IOs: Input path
