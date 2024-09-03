@@ -5,6 +5,7 @@
 
 `default_nettype none
 
+
 module elevator_output (
   input  wire [7:0] ui_in,    // Dedicated inputs: User-selected floor
   output wire [3:0] uo_out,   // Dedicated outputs: Currently accessed floor
@@ -19,11 +20,11 @@ module elevator_output (
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
   
-  //Output 1
-  wire or0_ouA, or0_ouB, or0_ouC, or0_ouD, or0_ouE;  
+  //Output: 1
+  wire or0_ouA, or0_ouB, or0_ouC, or0_ouD, or0_ouE;  // Output wire of OR gates
   
-  assign or0_ouA = ui_in[1] + ui_in[2]; 
-  assign or0_ouB = ui_in[4] + ui_in[5]; 
+  assign or0_ouA = ui_in[1] + ui_in[2]; // OR gate connecting inputs 0 and 1
+  assign or0_ouB = ui_in[4] + ui_in[5]; // OR gate connecting inputs 4 and 5
   assign or0_ouC = ui_in[6] + ui_in[7];
   assign or0_ouD = or0_ouA + or0_ouB;
   assign or0_ouE = or0_ouD + or0_ouC;
@@ -60,11 +61,13 @@ module elevator_output (
   assign or3_ouD = or3_ouC + ui_in[7];
   assign uo_out[3] = or3_ouD;
   
-  // Instantiating clock design to elevator design
+  wire[3:0] elevator_cf;
+  
+  // Instantiating clock components to elevator design
   elevator_design inst (
     .clk(clk),
     .floor(uo_out),
-    .y(uo_out)
+    .y(elevator_cf)
   );
     
   // Setting inactive output paths
@@ -99,3 +102,18 @@ module elevator_design(input clk, input [3:0] floor, output reg [3:0] y);
   assign y = cf;
               
 endmodule
+
+
+// Wait state
+/*
+module wait ();
+
+endmodule
+*/
+
+// Ready state
+/*
+module ready();
+  
+endmodule
+*/
