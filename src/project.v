@@ -5,12 +5,12 @@
 
 `default_nettype none
 
-module tt_um_elevator_output (
+module elevator_output (
   input  wire [7:0] ui_in,    // Dedicated inputs: User-selected floor
-  output wire [3:0] uo_out,   // Dedicated outputs: Currently accessed floor
-  input  wire [3:0] uio_in,   // IOs: Input path
-  output wire [3:0] uio_out,  // IOs: Output path
-  output wire [3:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+  output wire [7:0] uo_out,   // Dedicated outputs: Currently accessed floor
+  input  wire [7:0] uio_in,   // IOs: Input path
+  output wire [7:0] uio_out,  // IOs: Output path
+  output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
   input  wire       ena,      // always 1 when the design is powered, so you can ignore it
   input  wire       clk,      // clock
   input  wire       rst_n     // reset_n - low to reset
@@ -60,7 +60,36 @@ module tt_um_elevator_output (
   assign or3_ouD = or3_ouC + ui_in[7];
   assign uo_out[3] = or3_ouD;
   
-  wire[3:0] elevator_cf;
+  // Output 5
+  wire or4_ouA, or4_ouB; 
+  
+  assign or4_ouA = ui_in[1] + ui_in[5];
+  assign or4_ouB = or4_ouA + ui_in[7];
+  assign uo_out[4] = or4_ouB;
+  
+  // Output 6
+  wire or5_ouA, or5_ouB, or5_ouC; 
+  
+  assign or5_ouA = ui_in[3] + ui_in[4];
+  assign or5_ouB = ui_in[5] + ui_in[7];
+  assign or5_ouC = or5_ouA + or5_ouB;
+  assign uo_out[5] = or5_ouC;
+  
+  // Output 7
+  wire or6_ouA, or6_ouB, or6_ouC, or6_ouD, or6_ouE; 
+  
+  assign or6_ouA = ui_in[1] + ui_in[2];
+  assign or6_ouB = ui_in[3] + ui_in[4];
+  assign or6_ouC = ui_in[5] + ui_in[7];
+  assign or6_ouD = or6_ouA + or6_ouB;
+  assign or6_ouE = or6_ouC + or6_ouD;
+  assign uo_out[6] = or6_ouE;
+  
+  wire[7:0] elevator_cf;
+  
+  // Setting inactive output paths
+  assign uio_out = 8'b00000000;
+  assign uio_oe = 8'b00000000;
   
   // Instantiating clock components to elevator design
   elevator_design inst (
@@ -68,16 +97,13 @@ module tt_um_elevator_output (
     .floor(uo_out),
     .y(elevator_cf)
   );
-    
-  // Setting inactive output paths
-  assign uio_out = 4'b0;
-  assign uio_oe = 4'b0;
+   
   
 endmodule
 
-module elevator_design(input clk, input [3:0] floor, output reg [3:0] y);
+module elevator_design(input clk, input [7:0] floor, output reg [7:0] y);
   
-  reg [3:0] cf = 4'b0001; // Current floor initialized to 1
+  reg [7:0] cf = 8'b0001; // Current floor initialized to 1
   reg [31:0] clkdiv = 32'd0;
   
   always @(posedge clk) begin
@@ -88,10 +114,10 @@ module elevator_design(input clk, input [3:0] floor, output reg [3:0] y);
   
   always @(posedge clkdiv[24]) begin
     if (floor < cf) begin // Current floor is lower than desired floor
-      if (cf != 4'b0001) 
+      if (cf != 8'b0001) 
         cf <= cf >> 1; // Shift current floor right by one bit, descending by 1 floor
     end else if (floor > cf) begin // Current floor is higher than desired floor
-      if (cf != 4'b0001)
+      if (cf != 8'b0001)
         cf <= cf << 1; // Shift current floor left by one bit, ascending by 1 floor
     end else if (floor == cf) begin // Current floor is the same floor as desired floor
       cf <= floor; // Stay on current floor
@@ -116,3 +142,4 @@ module ready();
   
 endmodule
 */
+
