@@ -9,11 +9,11 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
+Implements an elevator interface on a digital clock based on user floor selection. 
 
 ## How to test
 
-Explain how to use your project
+Use board switches 1-4 to select the desired floor. 
 
 ## External hardware
 
