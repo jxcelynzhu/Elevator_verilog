@@ -5,139 +5,86 @@
 
 `default_nettype none
 
-module tt_um_elevator_output (
-  input  wire [7:0] ui_in,    // Dedicated inputs: User-selected floor
-  output wire [7:0] uo_out,   // Dedicated outputs: Currently accessed floor
-  input  wire [7:0] uio_in,   // IOs: Input path
-  output wire [7:0] uio_out,  // IOs: Output path
-  output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
-  input  wire       ena,      // always 1 when the design is powered, so you can ignore it
-  input  wire       clk,      // clock
-  input  wire       rst_n     // reset_n - low to reset
+module elevator_state_machine (
+  input clk, // Clock signal
+  input reset, // Reset signal -- ?
+  
+  input wire [3:0] requested_floor, // -- ? or reg
+  input wire [3:0] current_floor 
+  
+  /*input some_input,
+  output reg some_output*/
 );
- 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
-      
-  // Setting inactive output paths
-  assign uio_out = 8'b00000000;
-  assign uio_oe = 8'b00000000;
-  
-  // Instantiating clock components to elevator design
-  elevator_design inst (
-    .clk(clk),
-    .floor(ui_in), //User input to elevator_design 
-    .uo_out(uo_out) //Output based on the current floor
-  );
-endmodule
 
-module elevator_design(input wire clk, input wire [7:0] floor, output wire [7:0] uo_out);  
-  reg [7:0] cf = 8'b0001; // Current floor initialized to 1
-  reg [31:0] clkdiv = 32'd0;
-  
-  // Slowing down clock during transitions
-  always @(posedge clk) begin
-    clkdiv <= clkdiv + 1; 
-  end
-  
-  // Modified = to <= to use a non-blocking assignment
-    
-  always @(posedge clkdiv[24]) begin
-    if (floor < cf) begin // Current floor is lower than desired floor
-      if (cf != 8'b0001) begin
-        cf <= cf >> 1; // Shift current floor right by one bit, descending by 1 floor
-        //assign uo_out[0]= or0_ouE;
+  // Define the states
+  parameter IDLE = 2'b00;
+  //parameter NEW_REQUEST = 2'b01;
+  parameter MOVING_UP = 2'b10;
+  parameter MOVING_DOWN = 2'b11;
+
+  // State register
+  reg [1:0] current_state, next_state;
+
+  // Combinational logic for next state and output
+  always @(*) begin
+    case (current_state)
+      IDLE: begin
+        //some_output = 0;
+        if (requested_floor > current_floor) 
+          next_state = MOVING_UP;
+        else if (requested_floor < current_floor) 
+          next_state = MOVING_DOWN;
+        else 
+          next_state = IDLE;
       end
-    end else if (floor > cf) begin // Current floor is higher than desired floor
-      if (cf != 8'b0001) begin
-        cf <= cf << 1; // Shift current floor left by one bit, ascending by 1 floor
+      MOVING_UP: begin
+        //some_output = 1;  // Perform some work
+        if (requested_floor == current_floor)  // Check for completion
+          next_state = IDLE;
+        else
+          next_state = MOVING_UP;
       end
-    end else if (floor == cf) begin // Current floor is the same floor as desired floor
-      cf <= floor; // Stay on current floor
-      check_floor(cf, floor, uo_out);
-    end
-  end              
+      MOVING_DOWN: begin
+        //some_output = 0;
+        if (requested_floor == current_floor)  // Reset condition
+          next_state = IDLE;
+        else
+          next_state = MOVING_DOWN;
+      end
+      default:
+        next_state = IDLE; // Error state, go back to IDLE
+    endcase
+  end
+
+  // Sequential logic for state register
+  always @(posedge clk or posedge reset) begin
+    if (reset)
+      current_state <= IDLE;
+    else
+      current_state <= next_state;
+  end
+
 endmodule
 
-module check_floor (
-  input wire [7:0] cf, 
-  input wire[7:0] floor, 
-  output wire[7:0] uo_out
-  );
- 
-  if (cf == 8'b00000001) begin
-    //Output: 1
-    wire or0_ouA, or0_ouB, or0_ouC, or0_ouD, or0_ouE;  // Output wire of OR gates
-
-    assign or0_ouA = ui_in[1] + ui_in[2]; // OR gate connecting inputs 0 and 1
-    assign or0_ouB = ui_in[4] + ui_in[5]; // OR gate connecting inputs 4 and 5
-    assign or0_ouC = ui_in[6] + ui_in[7];
-    assign or0_ouD = or0_ouA + or0_ouB;
-    assign or0_ouE = or0_ouD + or0_ouC;
-    assign uo_out[0] = or0_ouE;
-  end 
-  else if (cf == 8'b00000010) begin
-    // Output 2
-    wire or1_ouA, or1_ouB, or1_ouC, or1_ouD, or1_ouE;
-
-    assign or1_ouA = ui_in[0] + ui_in[1];
-    assign or1_ouB = ui_in[2] + ui_in[3];
-    assign or1_ouC = ui_in[6] + ui_in[7];
-    assign or1_ouD = or1_ouA + or1_ouB;
-    assign or1_ouE = or1_ouC + or1_ouD;
-    assign uo_out[1] = or1_ouE;
+// 7-segment display
+module segment7(
+  input wire [3:0] floor, // 4 bit input to display digits < 10
+  output reg [6:0] segment // 7 bit output for 7-segment display
+);
+  
+  always @(*) begin
+    case (floor)
+      0: segment = 7'b0000001;
+      1: segment = 7'b1001111;
+      2: segment = 7'b0010010;
+      3: segment = 7'b0000110;
+      4: segment = 7'b1001100;
+      5: segment = 7'b0100100;
+      6: segment = 7'b0100000;
+      7: segment = 7'b0001111;
+      8: segment = 7'b0000000;
+      9 : segment = 7'b0000100;
+      default: seg = 7'b1111111; // All segments turned off
+    endcase
   end
-  else if (cf == 8'b00000011) begin
-    // Output 3 
-    wire or2_ouA, or2_ouB, or2_ouC, or2_ouD, or2_ouE, or2_ouF; 
-
-    assign or2_ouA = ui_in[0] + ui_in[2];
-    assign or2_ouB = ui_in[3] + ui_in[4];
-    assign or2_ouC = ui_in[5] + ui_in[6];
-    assign or2_ouE = or2_ouC + ui_in[7];
-    assign or2_ouD = or2_ouA + or2_ouB;
-    assign or2_ouF = or2_ouD + or2_ouE;
-    assign uo_out[2] = or2_ouF;
-  end
-  else if (cf == 8'b00000100) begin
-    // Output 4
-    wire or3_ouA, or3_ouB, or3_ouC, or3_ouD; 
-
-    assign or3_ouA = ui_in[1] + ui_in[2];
-    assign or3_ouB = ui_in[4] + ui_in[5];
-    assign or3_ouC = or3_ouA + or3_ouB;
-    assign or3_ouD = or3_ouC + ui_in[7];
-    assign uo_out[3] = or3_ouD;
-  end 
-  else if (cf == 8'b00000101) begin
-    // Output 5
-    wire or4_ouA, or4_ouB; 
-
-    assign or4_ouA = ui_in[1] + ui_in[5];
-    assign or4_ouB = or4_ouA + ui_in[7];
-    assign uo_out[4] = or4_ouB;
-  end
-  else if (cf == 8'b00000110) begin
-    // Output 6
-    wire or5_ouA, or5_ouB, or5_ouC; 
-
-    assign or5_ouA = ui_in[3] + ui_in[4];
-    assign or5_ouB = ui_in[5] + ui_in[7];
-    assign or5_ouC = or5_ouA + or5_ouB;
-    assign uo_out[5] = or5_ouC;
-  end
-  else if (cf == 8'b00000111) begin
-    // Output 7
-    wire or6_ouA, or6_ouB, or6_ouC, or6_ouD, or6_ouE; 
-
-    assign or6_ouA = ui_in[1] + ui_in[2];
-    assign or6_ouB = ui_in[3] + ui_in[4];
-    assign or6_ouC = ui_in[5] + ui_in[7];
-    assign or6_ouD = or6_ouA + or6_ouB;
-    assign or6_ouE = or6_ouC + or6_ouD;
-    assign uo_out[6] = or6_ouE;
-  end 
-  else 
-    assign uo_out[7] = 0;
 endmodule
-
