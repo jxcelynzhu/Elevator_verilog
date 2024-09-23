@@ -22,6 +22,7 @@ module tt_um_example (
   assign uio_oe  = 0;
  
   wire [3:0] floor;
+ 
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
@@ -29,7 +30,7 @@ module tt_um_example (
     .clk(clk),
     .reset(rst_n),
     .requested_floor(ui_in[3:0]),
-    //.requested_floor(4'd3),
+    //.requested_floor(4'd2),
     .current_floor(floor)
   );
  
@@ -37,7 +38,6 @@ module tt_um_example (
     .floor(floor),
     .segment(uo_out[6:0])
   );
-
 endmodule
 
 
@@ -58,6 +58,28 @@ module elevator_state_machine (
   // State register
   reg [1:0] current_state, next_state;
   reg [31:0] delay;
+  
+    // Sequential logic 
+  always @(posedge clk or negedge reset) begin
+   if (reset) begin
+          current_state <= IDLE;
+          current_floor <= 0;
+          delay <= 0;
+      end else begin
+          current_state <= next_state; //Update the current state
+
+          if (delay < DELAY_COUNT) begin
+              delay <= delay + 1; //Increment delay until reaches DELAY_COUNT
+          end else begin
+            //Update the current_floor
+            if (current_state == MOVING_UP) 
+                  current_floor <= current_floor + 1;
+            else if (current_state == MOVING_DOWN) 
+                  current_floor <= current_floor - 1;
+            delay <= 0; //Reset delay
+          end
+      end
+   end
 
   // Combinational logic for next state and output
   always @(*) begin
@@ -65,7 +87,7 @@ module elevator_state_machine (
       IDLE: begin
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
-        else if (requested_floor > current_floor)
+        else if (current_floor > requested_floor)
           next_state = MOVING_DOWN;
         else
           next_state = IDLE;
@@ -86,30 +108,8 @@ module elevator_state_machine (
         next_state = IDLE; // Error state, go back to IDLE
     endcase
   end
-
-  // Sequential logic for state register
-  always @(posedge clk or posedge reset)
-  begin
-    if (reset) begin
-        current_state <= IDLE;
-        current_floor <= 0;
-        delay <= 0;
-    end 
-    else begin
-      current_state <= next_state; // Updates current_state on each clock cycle
-        if (delay == DELAY_COUNT) begin
-          delay <= 0;
-          if (current_state == MOVING_UP) 
-              current_floor <= current_floor + 1;
-          else if (current_state == MOVING_DOWN) 
-              current_floor <= current_floor - 1;
-        end
-       	else  
-       	  delay <= delay + 1;
-      end
-  end
-
 endmodule
+
 
 // 7-segment display
 module segment7(
@@ -133,5 +133,4 @@ module segment7(
     endcase
   end
 endmodule
-
 
