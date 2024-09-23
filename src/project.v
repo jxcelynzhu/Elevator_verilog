@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7]  = 0;  
+  assign uo_out [7] = 0;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -29,7 +29,7 @@ module tt_um_example (
     .clk(clk),
     .reset(reset),
     //.requested_floor(ui_in[3:0]),
-    .requested_floor(4'd2),
+    .requested_floor(4'd3),
     .current_floor(floor)
   );
  
@@ -47,7 +47,6 @@ module elevator_state_machine (
  
   input wire [3:0] requested_floor, // -- ? or reg
   output reg [3:0] current_floor
- 
 );
 
   // Define the states
@@ -73,19 +72,19 @@ module elevator_state_machine (
           next_state = IDLE;
       end
       MOVING_UP: begin
-        if (requested_floor == current_floor)  // Check for completion
-          next_state = IDLE;
+        if (requested_floor < requested_floor)  
+          next_state = MOVING_UP;
         else
           begin
-            next_state = MOVING_UP;
+            next_state = IDLE; // Check for completion
           end
       end
       MOVING_DOWN: begin
-        if (requested_floor == current_floor)  // Reset condition
-          next_state = IDLE;
+        if (requested_floor > current_floor)  
+          next_state = MOVING_DOWN;
         else
           begin
-            next_state = MOVING_DOWN;
+            next_state = IDLE; // Reset condition
           end
       end
       default:
@@ -96,25 +95,25 @@ module elevator_state_machine (
   // Sequential logic for state register
   always @(posedge clk or posedge reset)
   begin
-    if (reset)
-      begin
+    if (reset) begin
         current_state <= IDLE;
         current_floor <= 0;
         delay <= 0;
-      end
-    else
-      begin
+    end 
+    else begin
       current_state <= next_state;
-        if (delay == DELAY_COUNT)
-          begin
+        if (delay == DELAY_COUNT) begin
             delay <= 0;
-            if (current_state == MOVING_UP)
+          if (current_state == MOVING_UP) begin
               current_floor <= current_floor + 1;
-            else if (current_state == MOVING_DOWN)
-              current_floor <= current_floor - 1;
           end
-        else
-       delay <= delay + 1;
+          else if (current_state == MOVING_DOWN) begin
+              current_floor <= current_floor - 1;
+          end 
+          end
+        else begin 
+       	  delay <= delay + 1;
+        end
       end
   end
 
@@ -142,3 +141,5 @@ module segment7(
     endcase
   end
 endmodule
+
+
