@@ -5,15 +5,49 @@
 
 `default_nettype none
 
+module tt_um_example (
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       reset     // reset_n - low to reset
+);
+
+  // All output pins must be assigned. If not used, assign to 0.
+  assign uo_out [7]  = 0;  
+  assign uio_out = 0;
+  assign uio_oe  = 0;
+ 
+  wire [3:0] floor;
+
+  // List all unused inputs to prevent warnings
+  wire _unused = &{ena, clk, reset, 1'b0};
+  elevator_state_machine em (
+    .clk(clk),
+    .reset(reset),
+    //.requested_floor(ui_in[3:0]),
+    .requested_floor(4'd2),
+    .current_floor(floor)
+  );
+ 
+  segment7 s7 (
+    .floor(floor),
+    .segment(uo_out[6:0])
+  );
+
+endmodule
+
+
 module elevator_state_machine (
   input clk, // Clock signal
   input reset, // Reset signal -- ?
-  
+ 
   input wire [3:0] requested_floor, // -- ? or reg
-  input wire [3:0] current_floor 
-  
-  /*input some_input,
-  output reg some_output*/
+  output reg [3:0] current_floor
+ 
 );
 
   // Define the states
@@ -21,35 +55,38 @@ module elevator_state_machine (
   //parameter NEW_REQUEST = 2'b01;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
+  parameter DELAY_COUNT = 32'h0f;  // make longer for real hardware
 
   // State register
   reg [1:0] current_state, next_state;
+  reg [31:0] delay;
 
   // Combinational logic for next state and output
   always @(*) begin
     case (current_state)
       IDLE: begin
-        //some_output = 0;
-        if (requested_floor > current_floor) 
+        if (requested_floor > current_floor)
           next_state = MOVING_UP;
-        else if (requested_floor < current_floor) 
+        else if (requested_floor < current_floor)
           next_state = MOVING_DOWN;
-        else 
+        else
           next_state = IDLE;
       end
       MOVING_UP: begin
-        //some_output = 1;  // Perform some work
         if (requested_floor == current_floor)  // Check for completion
           next_state = IDLE;
         else
-          next_state = MOVING_UP;
+          begin
+            next_state = MOVING_UP;
+          end
       end
       MOVING_DOWN: begin
-        //some_output = 0;
         if (requested_floor == current_floor)  // Reset condition
           next_state = IDLE;
         else
-          next_state = MOVING_DOWN;
+          begin
+            next_state = MOVING_DOWN;
+          end
       end
       default:
         next_state = IDLE; // Error state, go back to IDLE
@@ -57,11 +94,28 @@ module elevator_state_machine (
   end
 
   // Sequential logic for state register
-  always @(posedge clk or posedge reset) begin
+  always @(posedge clk or posedge reset)
+  begin
     if (reset)
-      current_state <= IDLE;
+      begin
+        current_state <= IDLE;
+        current_floor <= 0;
+        delay <= 0;
+      end
     else
+      begin
       current_state <= next_state;
+        if (delay == DELAY_COUNT)
+          begin
+            delay <= 0;
+            if (current_state == MOVING_UP)
+              current_floor <= current_floor + 1;
+            else if (current_state == MOVING_DOWN)
+              current_floor <= current_floor - 1;
+          end
+        else
+       delay <= delay + 1;
+      end
   end
 
 endmodule
@@ -71,7 +125,7 @@ module segment7(
   input wire [3:0] floor, // 4 bit input to display digits < 10
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
-  
+ 
   always @(*) begin
     case (floor)
       0: segment = 7'b0000001;
@@ -84,7 +138,7 @@ module segment7(
       7: segment = 7'b0001111;
       8: segment = 7'b0000000;
       9 : segment = 7'b0000100;
-      default: seg = 7'b1111111; // All segments turned off
+      default: segment = 7'b1111111; // All segments turned off
     endcase
   end
 endmodule
