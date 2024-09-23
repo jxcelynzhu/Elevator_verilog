@@ -90,23 +90,18 @@ module elevator_state_machine (
   
    // Sequential logic 
   always @(posedge clk or negedge reset) begin
-   if (reset) begin
+     if (reset) begin
           current_state <= IDLE;
           current_floor <= 0;
           delay <= 0;
       end else begin
           current_state <= next_state; //Update the current state
-
-          if (delay < DELAY_COUNT) begin
-              delay <= delay + 1; //Increment delay until reaches DELAY_COUNT
-          end else begin
             //Update the current_floor
             if (current_state == MOVING_UP) 
                   current_floor <= current_floor + 1;
             else if (current_state == MOVING_DOWN) 
                   current_floor <= current_floor - 1;
             delay <= 0; //Reset delay
-          end
       end
    end
 endmodule
@@ -133,6 +128,5 @@ module segment7(
       default: segment = 7'b1111111; // All segments turned off
     endcase
   end
-endmodule
 endmodule
 
