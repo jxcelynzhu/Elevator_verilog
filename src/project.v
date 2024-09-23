@@ -13,7 +13,7 @@ module tt_um_example (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
-    input  wire       reset     // reset_n - low to reset
+    input  wire       rst_n     // reset_n - low to reset
 );
 
   // All output pins must be assigned. If not used, assign to 0.
@@ -24,10 +24,10 @@ module tt_um_example (
   wire [3:0] floor;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, reset, 1'b0};
+  wire _unused = &{ena, clk, rst_n, 1'b0};
   elevator_state_machine em (
     .clk(clk),
-    .reset(reset),
+    .reset(rst_n),
     //.requested_floor(ui_in[3:0]),
     .requested_floor(4'd3),
     .current_floor(floor)
@@ -51,7 +51,6 @@ module elevator_state_machine (
 
   // Define the states
   parameter IDLE = 2'b00;
-  //parameter NEW_REQUEST = 2'b01;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
   parameter DELAY_COUNT = 32'h0f;  // make longer for real hardware
@@ -64,28 +63,24 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE: begin
-        if (requested_floor > current_floor)
+        if (current_floor < requested_floor)
           next_state = MOVING_UP;
-        else if (requested_floor < current_floor)
+        else if (requested_floor > current_floor)
           next_state = MOVING_DOWN;
         else
           next_state = IDLE;
       end
       MOVING_UP: begin
-        if (requested_floor < requested_floor)  
+        if (current_floor < requested_floor)  
           next_state = MOVING_UP;
         else
-          begin
-            next_state = IDLE; // Check for completion
-          end
+          next_state = IDLE; // Check for completion
       end
       MOVING_DOWN: begin
-        if (requested_floor > current_floor)  
-          next_state = MOVING_DOWN;
+        if (current_floor > requested_floor)  
+      	  next_state = MOVING_DOWN;
         else
-          begin
-            next_state = IDLE; // Reset condition
-          end
+          next_state = IDLE; // Reset condition
       end
       default:
         next_state = IDLE; // Error state, go back to IDLE
@@ -101,19 +96,16 @@ module elevator_state_machine (
         delay <= 0;
     end 
     else begin
-      current_state <= next_state;
+      current_state <= next_state; // Updates current_state on each clock cycle
         if (delay == DELAY_COUNT) begin
-            delay <= 0;
-          if (current_state == MOVING_UP) begin
+          delay <= 0;
+          if (current_state == MOVING_UP) 
               current_floor <= current_floor + 1;
-          end
-          else if (current_state == MOVING_DOWN) begin
+          else if (current_state == MOVING_DOWN) 
               current_floor <= current_floor - 1;
-          end 
-          end
-        else begin 
-       	  delay <= delay + 1;
         end
+       	else  
+       	  delay <= delay + 1;
       end
   end
 
