@@ -13,7 +13,7 @@ module tt_um_example (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input  wire       reset     // reset_n - low to reset
 );
 
   // All output pins must be assigned. If not used, assign to 0.
@@ -25,12 +25,12 @@ module tt_um_example (
  
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  wire _unused = &{ena, clk, reset, 1'b0};
   elevator_state_machine em (
     .clk(clk),
-    .reset(rst_n),
-    //.requested_floor(ui_in[3:0]),
-    .requested_floor(4'd2),
+    .reset(reset),
+    .requested_floor(ui_in[3:0]),
+    //.requested_floor(4'd1),
     .current_floor(floor)
   );
  
@@ -43,9 +43,8 @@ endmodule
 
 module elevator_state_machine (
   input clk, // Clock signal
-  input reset, // Reset signal -- ?
- 
-  input wire [3:0] requested_floor, // -- ? or reg
+  input reset, // Reset signal 
+  input wire [3:0] requested_floor,
   output reg [3:0] current_floor
 );
 
@@ -53,12 +52,11 @@ module elevator_state_machine (
   parameter IDLE = 2'b00;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
-  parameter DELAY_COUNT = 32'h0f;  // make longer for real hardware
+  parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
 
   // State register
   reg [1:0] current_state, next_state;
   reg [31:0] delay;
-  
 
   // Combinational logic for next state and output
   always @(*) begin
@@ -72,38 +70,52 @@ module elevator_state_machine (
           next_state = IDLE;
       end
       MOVING_UP: begin
-        if (current_floor < requested_floor)  
+        if (current_floor == requested_floor)
+          next_state = IDLE;
+         else 
+           next_state = MOVING_UP;
+        /*if (current_floor < requested_floor)  
           next_state = MOVING_UP;
         else
-          next_state = IDLE; // Check for completion
+          next_state = IDLE; // Check for completion*/
       end
       MOVING_DOWN: begin
-        if (current_floor > requested_floor)  
+        /*if (current_floor > requested_floor)  
       	  next_state = MOVING_DOWN;
         else
-          next_state = IDLE; // Reset condition
+          next_state = IDLE; // Reset condition*/
+        if (current_floor == requested_floor)
+          next_state = IDLE;
+         else 
+           next_state = MOVING_DOWN;
       end
       default:
         next_state = IDLE; // Error state, go back to IDLE
     endcase
   end
   
-   // Sequential logic 
-    always @(posedge clk or posedge reset) begin
-     if (reset) begin
+  
+  // Sequential logic 
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
           current_state <= IDLE;
           current_floor <= 0;
           delay <= 0;
-      end else begin
-          current_state <= next_state; //Update the current state
-            //Update the current_floor
-            if (current_state == MOVING_UP) 
-                  current_floor <= current_floor + 1;
-            else if (current_state == MOVING_DOWN) 
-                  current_floor <= current_floor - 1;
-            delay <= 0; //Reset delay
-      end
-   end
+    end else begin
+      current_state <= next_state; //Update the current state
+      //Update the current_floor
+      
+      if (delay == DELAY_COUNT) begin
+        delay <= 0; //Reset delay
+        if (current_state == MOVING_UP) 
+          current_floor <= current_floor + 1;
+        else if (current_state == MOVING_DOWN) 
+             current_floor <= current_floor - 1;
+      end else 
+         delay <= delay + 1;
+      
+    end
+  end
 endmodule
 
 
