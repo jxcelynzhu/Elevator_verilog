@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7] = 0;  
+    assign uo_out [7] = 1;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -127,7 +127,7 @@ module segment7(
  
   always @(*) begin
     case (floor)
-      0: segment = 7'b0000001;
+      0: segment = 7'b1000000;
       1: segment = 7'b1001111;
       2: segment = 7'b0010010;
       3: segment = 7'b0000110;
