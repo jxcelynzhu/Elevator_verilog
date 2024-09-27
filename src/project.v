@@ -13,7 +13,7 @@ module tt_um_example (
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
-    input  wire       reset     // reset_n - low to reset
+    input  wire       rst_n     // reset_n - low to reset
 );
 
   // All output pins must be assigned. If not used, assign to 0.
@@ -25,10 +25,10 @@ module tt_um_example (
  
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, reset, 1'b0};
+  wire _unused = &{ena, clk, rst_n, 1'b0};
   elevator_state_machine em (
     .clk(clk),
-    .reset(reset),
+    .reset(rst_n),
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd1),
     .current_floor(floor)
@@ -96,8 +96,8 @@ module elevator_state_machine (
   
   
   // Sequential logic 
-  always @(posedge clk or posedge reset) begin
-    if (reset) begin
+    always @(posedge clk or negedge reset) begin
+    if (!reset) begin
           current_state <= IDLE;
           current_floor <= 0;
           delay <= 0;
