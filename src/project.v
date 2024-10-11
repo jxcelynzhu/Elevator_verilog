@@ -17,22 +17,20 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7] = 1;  
+  assign uo_out [7] = 0;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
   wire [3:0] floor;
  
-
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
   elevator_state_machine em (
     .clk(clk),
     .reset(rst_n),
-    .requested_floor(ui_in[3:0]),
-    //.requested_floor(4'd1),
-    .current_floor(floor),
-    .IDLE (uo_out [7])
+    //.requested_floor(ui_in[3:0]),
+    .requested_floor(4'd2),
+    .current_floor(floor),     //.IDLE (uo_out [7])
   );
  
   segment7 s7 (
@@ -47,7 +45,7 @@ module elevator_state_machine (
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
   output reg [3:0] current_floor
-  //output reg IDLE
+    //output reg IDLE
 );
 
   // Define the states
@@ -133,16 +131,16 @@ module segment7(
  
   always @(*) begin
     case (floor)
-      0: segment = 7'b0000001; 
-      1: segment = 7'b0110000; 
-      2: segment = 7'b1101101; 
-      3: segment = 7'b1111001; 
-      4: segment = 7'b0110011;
-      5: segment = 7'b1011011;
-      6: segment = 7'b1011111;
-      7: segment = 7'b1110000;
-      8: segment = 7'b1111111; 
-      9 : segment = 7'b1111011; 
+      0: segment = 7'b0000001;
+      1: segment = 7'b1001111;
+      2: segment = 7'b0010010;
+      3: segment = 7'b0000110;
+      4: segment = 7'b1001100;
+      5: segment = 7'b0100100;
+      6: segment = 7'b0100000;
+      7: segment = 7'b0001111;
+      8: segment = 7'b0000000;
+      9 : segment = 7'b0000100;
       default: segment = 7'b1111111; // All segments turned off
     endcase
   end
