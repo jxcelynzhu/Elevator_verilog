@@ -47,7 +47,7 @@ module elevator_state_machine (
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
   output reg [3:0] current_floor
- // output reg IDLE
+  //output reg IDLE
 );
 
   // Define the states
@@ -64,7 +64,7 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE: begin
-    //    IDLE = 1
+       // IDLE = 1
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -73,7 +73,7 @@ module elevator_state_machine (
           next_state = IDLE;
       end
       MOVING_UP: begin
-    //    IDLE = 0
+       // IDLE = 0
         if (current_floor == requested_floor)
           next_state = IDLE;
          else 
@@ -88,7 +88,7 @@ module elevator_state_machine (
       	  next_state = MOVING_DOWN;
         else
           next_state = IDLE; // Reset condition*/
-      //  IDLE = 0
+        // IDLE = 0
         if (current_floor == requested_floor)
           next_state = IDLE;
          else 
@@ -130,12 +130,6 @@ module segment7(
   input wire [3:0] floor, // 4 bit input to display digits < 10
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
-  
-/*
-module segment7(
-  input wire [3:0] floor, // 4 bit input to display digits < 10
-  output reg [6:0] segment, // 7 bit output for 7-segment display
-);*/
  
   always @(*) begin
     case (floor)
@@ -149,7 +143,7 @@ module segment7(
       7: segment = 7'b1110000;
       8: segment = 7'b1111111; 
       9 : segment = 7'b1111011; 
-      default: segment = 7'b0; // All segments turned off
+      default: segment = 7'b1111111; // All segments turned off
     endcase
   end
 endmodule
