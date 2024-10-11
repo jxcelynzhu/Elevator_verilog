@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7] = 1;  
+  assign uo_out [7] = 0;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -28,9 +28,10 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .reset(rst_n),
-    .requested_floor(ui_in[3:0]),
-    //.requested_floor(4'd2),
-    .current_floor(floor)     //.IDLE (uo_out [7])
+    //.requested_floor(ui_in[3:0]),
+    .requested_floor(4'd2),
+    .current_floor(floor),  
+    .IDLE (uo_out [7])
   );
   
   segment7 s7 (
@@ -44,12 +45,12 @@ module elevator_state_machine (
   input clk, // Clock signal
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
-  output reg [3:0] current_floor
-    //output reg IDLE
+  output reg [3:0] current_floor,
+  output reg IDLE 
 );
 
   // Define the states
-  parameter IDLE = 2'b00;
+  parameter IDLE_STATE = 2'b00;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
   parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
@@ -61,19 +62,19 @@ module elevator_state_machine (
   // Combinational logic for next state and output
   always @(*) begin
     case (current_state)
-      IDLE: begin
-       // IDLE = 1
+      IDLE_STATE: begin
+       	IDLE = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
           next_state = MOVING_DOWN;
         else
-          next_state = IDLE;
+          next_state = IDLE_STATE;
       end
       MOVING_UP: begin
-       // IDLE = 0
+       IDLE = 0;
         if (current_floor == requested_floor)
-          next_state = IDLE;
+          next_state = IDLE_STATE;
          else 
            next_state = MOVING_UP;
         /*if (current_floor < requested_floor)  
@@ -86,14 +87,14 @@ module elevator_state_machine (
       	  next_state = MOVING_DOWN;
         else
           next_state = IDLE; // Reset condition*/
-        // IDLE = 0
+        IDLE = 0;
         if (current_floor == requested_floor)
-          next_state = IDLE;
+          next_state = IDLE_STATE;
          else 
            next_state = MOVING_DOWN;
       end
       default:
-        next_state = IDLE; // Error state, go back to IDLE
+        next_state = IDLE_STATE; // Error state, go back to IDLE
     endcase
   end
     
@@ -101,7 +102,7 @@ module elevator_state_machine (
   // Sequential logic 
   always @(posedge clk or posedge reset) begin
     if (reset) begin
-          current_state <= IDLE;
+          current_state <= IDLE_STATE;
           current_floor <= 0;
           delay <= 0;
     end else begin
@@ -129,7 +130,7 @@ module segment7(
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
  
-  /*
+  
   always @(*) begin
     case (floor)
       0: segment = 7'b1000000; 
@@ -145,8 +146,8 @@ module segment7(
       default: segment = 7'b1111111;
     endcase
   end
-  */
   
+  /*
     always @(*) begin
     case (floor)
       0: segment = 7'b0111111; 
@@ -161,6 +162,6 @@ module segment7(
       9: segment = 7'b1101111;
       default: segment = 7'b0000000;
     endcase
-  end
+  end*/
   
 endmodule
