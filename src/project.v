@@ -75,23 +75,12 @@ module elevator_state_machine (
        IDLE = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
-         else 
-           next_state = MOVING_UP;
-        /*if (current_floor < requested_floor)  
-          next_state = MOVING_UP;
-        else
-          next_state = IDLE; // Check for completion*/
       end
       MOVING_DOWN: begin
-        /*if (current_floor > requested_floor)  
-      	  next_state = MOVING_DOWN;
-        else
-          next_state = IDLE; // Reset condition*/
+
         IDLE = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
-         else 
-           next_state = MOVING_DOWN;
       end
       default:
         next_state = IDLE_STATE; // Error state, go back to IDLE
@@ -114,7 +103,7 @@ module elevator_state_machine (
         if (current_state == MOVING_UP) 
           current_floor <= current_floor + 1;
         else if (current_state == MOVING_DOWN) 
-             current_floor <= current_floor - 1;
+          current_floor <= current_floor - 1;
       end else 
          delay <= delay + 1;
       
