@@ -17,7 +17,6 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7] = 0;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -31,7 +30,7 @@ module tt_um_example (
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd2),
     .current_floor(floor)
-    //.IDLE (uo_out [7])
+    .idle (uo_out [7])
   );
   
   segment7 s7 (
@@ -45,8 +44,8 @@ module elevator_state_machine (
   input clk, // Clock signal
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
-  output reg [3:0] current_floor
-  //output reg IDLE 
+  output reg [3:0] current_floor,
+  output reg idle_display 
 );
 
   // Define the states
@@ -64,7 +63,7 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
-       	//IDLE = 1;
+       	idle = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -73,12 +72,12 @@ module elevator_state_machine (
           next_state = IDLE_STATE;
       end
       MOVING_UP: begin
-       //IDLE = 0;
+       idle_display  = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
       end
       MOVING_DOWN: begin
-        //IDLE = 0;
+        idle_display  = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
       end
