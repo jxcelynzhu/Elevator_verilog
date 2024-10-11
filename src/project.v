@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out [7] = 0;  
+  assign uo_out [7] = 1;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -28,8 +28,8 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .reset(rst_n),
-    //.requested_floor(ui_in[3:0]),
-    .requested_floor(4'd2),
+    .requested_floor(ui_in[3:0]),
+    //.requested_floor(4'd2),
     .current_floor(floor)     //.IDLE (uo_out [7])
   );
   
@@ -129,9 +129,10 @@ module segment7(
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
  
+  /*
   always @(*) begin
     case (floor)
-      0: segment = 7'b1000000;
+      0: segment = 7'b1000000; 
       1: segment = 7'b1111001;
       2: segment = 7'b0100100;
       3: segment = 7'b0110000;
@@ -142,18 +143,24 @@ module segment7(
       8: segment = 7'b0000000;
       9: segment = 7'b0010000;
       default: segment = 7'b1111111;
-      /*
-      0: segment = 7'b0000001; 1000000
-      1: segment = 7'b1001111; 1111001
-      2: segment = 7'b0010010; 0100100
-      3: segment = 7'b0000110; 0110000
-      4: segment = 7'b1001100; 0011001
-      5: segment = 7'b0100100; 0010010
-      6: segment = 7'b0100000; 0000010
-      7: segment = 7'b0001111;
-      8: segment = 7'b0000000;
-      9 : segment = 7'b0000100;
-      default: segment = 7'b1111111; // All segments turned off*/
     endcase
   end
+  */
+  
+    always @(*) begin
+    case (floor)
+      0: segment = 7'b0111111; 
+      1: segment = 7'b0000110;
+      2: segment = 7'b1011011;
+      3: segment = 7'b1001111;
+      4: segment = 7'b1100110; 
+      5: segment = 7'b1101101;
+      6: segment = 7'b1111101; 
+      7: segment = 7'b0000111; 
+      8: segment = 7'b1111111;
+      9: segment = 7'b1101111;
+      default: segment = 7'b0000000;
+    endcase
+  end
+  
 endmodule
