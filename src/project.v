@@ -30,9 +30,9 @@ module tt_um_example (
     .reset(rst_n),
     //.requested_floor(ui_in[3:0]),
     .requested_floor(4'd2),
-    .current_floor(floor),     //.IDLE (uo_out [7])
+    .current_floor(floor)     //.IDLE (uo_out [7])
   );
- 
+  
   segment7 s7 (
     .floor(floor),
     .segment(uo_out[6:0])
