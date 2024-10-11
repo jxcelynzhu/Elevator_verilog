@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-    assign uo_out [7] = 1;  
+  assign uo_out [7] = 1;  
   assign uio_out = 0;
   assign uio_oe  = 0;
  
@@ -31,7 +31,8 @@ module tt_um_example (
     .reset(rst_n),
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd1),
-    .current_floor(floor)
+    .current_floor(floor),
+    .IDLE (uo_out [7])
   );
  
   segment7 s7 (
@@ -46,6 +47,7 @@ module elevator_state_machine (
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
   output reg [3:0] current_floor
+ // output reg IDLE
 );
 
   // Define the states
@@ -62,6 +64,7 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE: begin
+    //    IDLE = 1
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -70,6 +73,7 @@ module elevator_state_machine (
           next_state = IDLE;
       end
       MOVING_UP: begin
+    //    IDLE = 0
         if (current_floor == requested_floor)
           next_state = IDLE;
          else 
@@ -84,6 +88,7 @@ module elevator_state_machine (
       	  next_state = MOVING_DOWN;
         else
           next_state = IDLE; // Reset condition*/
+      //  IDLE = 0
         if (current_floor == requested_floor)
           next_state = IDLE;
          else 
@@ -93,11 +98,11 @@ module elevator_state_machine (
         next_state = IDLE; // Error state, go back to IDLE
     endcase
   end
-  
+    
   
   // Sequential logic 
-    always @(posedge clk or negedge reset) begin
-    if (!reset) begin
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
           current_state <= IDLE;
           current_floor <= 0;
           delay <= 0;
@@ -120,25 +125,31 @@ endmodule
 
 
 // 7-segment display
+
 module segment7(
   input wire [3:0] floor, // 4 bit input to display digits < 10
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
+  
+/*
+module segment7(
+  input wire [3:0] floor, // 4 bit input to display digits < 10
+  output reg [6:0] segment, // 7 bit output for 7-segment display
+);*/
  
   always @(*) begin
     case (floor)
-      0: segment = 7'b1000000;
-      1: segment = 7'b1001111;
-      2: segment = 7'b0010010;
-      3: segment = 7'b0000110;
-      4: segment = 7'b1001100;
-      5: segment = 7'b0100100;
-      6: segment = 7'b0100000;
-      7: segment = 7'b0001111;
-      8: segment = 7'b0000000;
-      9 : segment = 7'b0000100;
-      default: segment = 7'b1111111; // All segments turned off
+      0: segment = 7'b0000001; 
+      1: segment = 7'b0110000; 
+      2: segment = 7'b1101101; 
+      3: segment = 7'b1111001; 
+      4: segment = 7'b0110011;
+      5: segment = 7'b1011011;
+      6: segment = 7'b1011111;
+      7: segment = 7'b1110000;
+      8: segment = 7'b1111111; 
+      9 : segment = 7'b1111011; 
+      default: segment = 7'b0; // All segments turned off
     endcase
   end
 endmodule
-
