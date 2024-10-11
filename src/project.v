@@ -30,8 +30,8 @@ module tt_um_example (
     .reset(rst_n),
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd2),
-    .current_floor(floor),  
-    .IDLE (uo_out [7])
+    .current_floor(floor)
+    //.IDLE (uo_out [7])
   );
   
   segment7 s7 (
@@ -45,8 +45,8 @@ module elevator_state_machine (
   input clk, // Clock signal
   input reset, // Reset signal 
   input wire [3:0] requested_floor,
-  output reg [3:0] current_floor,
-  output reg IDLE 
+  output reg [3:0] current_floor
+  //output reg IDLE 
 );
 
   // Define the states
@@ -63,7 +63,7 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE_STATE: begin
-       	IDLE = 1;
+       	//IDLE = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -72,13 +72,13 @@ module elevator_state_machine (
           next_state = IDLE_STATE;
       end
       MOVING_UP: begin
-       IDLE = 0;
+       //IDLE = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
       end
       MOVING_DOWN: begin
 
-        IDLE = 0;
+        //IDLE = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
       end
@@ -119,7 +119,7 @@ module segment7(
   output reg [6:0] segment // 7 bit output for 7-segment display
 );
  
-  
+  /*
   always @(*) begin
     case (floor)
       0: segment = 7'b1000000; 
@@ -134,9 +134,9 @@ module segment7(
       9: segment = 7'b0010000;
       default: segment = 7'b1111111;
     endcase
-  end
+  end*/
   
-  /*
+  
     always @(*) begin
     case (floor)
       0: segment = 7'b0111111; 
@@ -151,6 +151,6 @@ module segment7(
       9: segment = 7'b1101111;
       default: segment = 7'b0000000;
     endcase
-  end*/
+  end
   
 endmodule
