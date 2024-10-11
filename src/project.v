@@ -53,6 +53,7 @@ module elevator_state_machine (
   parameter IDLE_STATE = 2'b00;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
+  parameter DUMMY_STATE = 2'b01;
   parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
 
   // State register
@@ -62,7 +63,7 @@ module elevator_state_machine (
   // Combinational logic for next state and output
   always @(*) begin
     case (current_state)
-      IDLE_STATE, 2'b01: begin
+      IDLE_STATE, DUMMY_STATE: begin
        	//IDLE = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
@@ -77,7 +78,6 @@ module elevator_state_machine (
           next_state = IDLE_STATE;
       end
       MOVING_DOWN: begin
-
         //IDLE = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
