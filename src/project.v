@@ -30,7 +30,7 @@ module tt_um_example (
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd2),
     .current_floor(floor),
-    .idle (uo_out [7])
+    .idle_display (uo_out [7])
   );
   
   segment7 s7 (
@@ -63,7 +63,7 @@ module elevator_state_machine (
   always @(*) begin
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
-       	idle = 1;
+       	idle_display = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -71,15 +71,14 @@ module elevator_state_machine (
         else
           next_state = IDLE_STATE;
       end
-      MOVING_UP: begin
+      MOVING_UP, MOVING_DOWN: begin
        idle_display  = 0;
         if (current_floor == requested_floor)
           next_state = IDLE_STATE;
-      end
-      MOVING_DOWN: begin
-        idle_display  = 0;
-        if (current_floor == requested_floor)
-          next_state = IDLE_STATE;
+        else if (current_floor < requested_floor)
+          next_state = MOVING_UP;
+        else
+          next_state = MOVING_DOWN;
       end
       default:
         next_state = IDLE_STATE; // Error state, go back to IDLE
