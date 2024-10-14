@@ -26,7 +26,7 @@ module tt_um_example (
   wire _unused = &{ena, 1'b0};
   elevator_state_machine em (
     .clk(clk),
-    .reset(rst_n),
+    .rst_n(rst_n),
     .requested_floor(ui_in[3:0]),
     //.requested_floor(4'd2),
     .current_floor(floor),
@@ -42,7 +42,7 @@ endmodule
 
 module elevator_state_machine (
   input clk, // Clock signal
-  input reset, // Reset signal 
+  input rst_n, // Reset signal 
   input wire [3:0] requested_floor,
   output reg [3:0] current_floor,
   output reg idle_display 
@@ -87,8 +87,8 @@ module elevator_state_machine (
     
   
   // Sequential logic 
-  always @(posedge clk or posedge reset) begin
-    if (reset) begin
+  always @(posedge clk or posedge rst_n) begin
+    if (rst_n) begin
           current_state <= IDLE_STATE;
           current_floor <= 0;
           delay <= 0;
