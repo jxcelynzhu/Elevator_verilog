@@ -29,8 +29,8 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .rst_n(rst_n),
-    .requested_floor(ui_in[3:0]),
-    //.requested_floor(4'd2),
+    //.requested_floor(ui_in[3:0]),
+    .requested_floor(4'd2),
     .current_floor(floor),
     .idle_display (uo_out [7])
   );
@@ -79,12 +79,12 @@ module elevator_state_machine (
         /* Next state is to move up if the currently accessed floor is below the 
            desired floor. Also checks if the current floor is less than 5
         */
-        if (current_floor < requested_floor && current_floor < 5)
+        if (current_floor < requested_floor && current_floor < 4'd5)
           next_state = MOVING_UP;
         /* Next state is to move down if the currently accessed floor is aboce the 
            desired floor. Also checks if the current floor is greater than 0
         */
-        else if (current_floor > requested_floor && current_floor > 0)
+        else if (current_floor > requested_floor && current_floor > 4'd0)
           next_state = MOVING_DOWN;
         /* Remains in idle state if the currently accessed floor is the same 
            as the desired floor */
