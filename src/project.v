@@ -74,11 +74,12 @@ module elevator_state_machine (
       end
       MOVING_UP, MOVING_DOWN: begin
        	idle_display  = 0;
-
-       if (current_floor == requested_floor)
+       if (current_floor < requested_floor)
+            next_state = MOVING_UP;
+       else if (current_floor > requested_floor)
+           next_state = MOVING_DOWN;
+       else 
           next_state = IDLE_STATE;
-        else
-          next_state = MOVING_DOWN;
       end
       default:
         next_state = IDLE_STATE; // Error state, go back to IDLE
