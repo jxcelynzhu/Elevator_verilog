@@ -74,7 +74,7 @@ module elevator_state_machine (
       end
       MOVING_UP, MOVING_DOWN: begin
        	idle_display  = 0;
-          if (current_floor < requested_floor && current_floor < 4'd5)
+          if (current_floor < requested_floor /*&& current_floor < 4'd5*/)
             next_state = MOVING_UP;
        else if (current_floor > requested_floor)
            next_state = MOVING_DOWN;
@@ -102,9 +102,10 @@ module elevator_state_machine (
               current_floor <= current_floor + 1;
           else if (current_state == MOVING_DOWN) 
               current_floor <= current_floor - 1;
-      end else 
-         delay <= delay + 1;
-      
+          else
+              delay<=delay+1;
+    end //else 
+         //delay <= delay + 1;
     end
   end
 endmodule
