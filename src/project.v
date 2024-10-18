@@ -101,9 +101,9 @@ module elevator_state_machine (
 
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
-          if (current_state == MOVING_UP && current_floor < 4'd5) 
+          if (current_state == MOVING_UP /*&& current_floor < 4'd5*/) 
               current_floor <= current_floor + 1;
-          else if (current_state == MOVING_DOWN && current_floor > 4'd0) 
+          else if (current_state == MOVING_DOWN /*&& current_floor > 4'd0*/) 
               current_floor <= current_floor - 1;
       end else 
          delay <= delay + 1;
