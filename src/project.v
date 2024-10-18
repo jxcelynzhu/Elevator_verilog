@@ -23,9 +23,8 @@ module tt_um_example (
   wire [3:0] floor;
  
   // List all unused inputs to prevent warnings
-  //wire _unused = &{ena, 1'b0};
 
-  wire _unused = &{ena, ui_in[7:4], uio_in[7:0], 1'b0};
+  wire _unused = &{ena, ui_in[7:4], uio_in[7:0], uio_out[7:0], uio_oe[7:0], 1'b0};
 
   elevator_state_machine em (
     .clk(clk),
@@ -75,13 +74,22 @@ module elevator_state_machine (
           next_state = IDLE_STATE;
       end
       MOVING_UP, MOVING_DOWN: begin
-       idle_display  = 0;
-        if (current_floor == requested_floor)
-          next_state = IDLE_STATE;
-        else if (current_floor < requested_floor)
+       	idle_display  = 0;
+ 
+        /* Next state is to move up if the currently accessed floor is below the 
+           desired floor. Also checks if the current floor is less than 5
+        */
+        if (current_floor < requested_floor && current_floor < 5)
           next_state = MOVING_UP;
-        else
+        /* Next state is to move down if the currently accessed floor is aboce the 
+           desired floor. Also checks if the current floor is greater than 0
+        */
+        else if (current_floor > requested_floor && current_floor > 0)
           next_state = MOVING_DOWN;
+        /* Remains in idle state if the currently accessed floor is the same 
+           as the desired floor */
+        else
+          next_state = IDLE_STATE;
       end
       default:
         next_state = IDLE_STATE; // Error state, go back to IDLE
@@ -97,8 +105,7 @@ module elevator_state_machine (
           delay <= 0;
     end else begin
       current_state <= next_state; //Update the current state
-      //Update the current_floor
-      
+
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
         if (current_state == MOVING_UP) 
