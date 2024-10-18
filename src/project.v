@@ -55,8 +55,9 @@ module elevator_state_machine (
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
   parameter DUMMY_STATE = 2'b01;
-  parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
-
+ // parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
+  DELAY_COUNT = 32'd100000;
+    
   // State register
   reg [1:0] current_state, next_state;
   reg [31:0] delay;
@@ -75,19 +76,11 @@ module elevator_state_machine (
       end
       MOVING_UP, MOVING_DOWN: begin
        	idle_display  = 0;
- 
-        /* Next state is to move up if the currently accessed floor is below the 
-           desired floor
-        */
+
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
-        /* Next state is to move down if the currently accessed floor is aboce the 
-           desired floor
-        */
         else if (current_floor > requested_floor)
           next_state = MOVING_DOWN;
-        /* Remains in idle state if the currently accessed floor is the same 
-           as the desired floor */
         else
           next_state = IDLE_STATE;
       end
@@ -108,9 +101,9 @@ module elevator_state_machine (
 
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
-          if (current_state == MOVING_UP && current_floor < 4'd4) 
+          if (current_state == MOVING_UP && current_floor < 4'd5) 
               current_floor <= current_floor + 1;
-          else if (current_state == MOVING_DOWN && current_floor > 4'd1) 
+          else if (current_state == MOVING_DOWN && current_floor > 4'd0) 
               current_floor <= current_floor - 1;
       end else 
          delay <= delay + 1;
