@@ -56,7 +56,7 @@ module elevator_state_machine (
   parameter MOVING_DOWN = 2'b11;
   parameter DUMMY_STATE = 2'b01;
  // parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
-  DELAY_COUNT = 32'd100000;
+  parameter DELAY_COUNT = 32'd100000;
     
   // State register
   reg [1:0] current_state, next_state;
