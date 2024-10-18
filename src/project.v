@@ -108,9 +108,9 @@ module elevator_state_machine (
 
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
-          if (current_state == MOVING_UP/* && current_floor < 4'd4*/) 
+          if (current_state == MOVING_UP && current_floor < 4'd4) 
               current_floor <= current_floor + 1;
-          else if (current_state == MOVING_DOWN && /*current_floor > 4'd1*/) 
+          else if (current_state == MOVING_DOWN && current_floor > 4'd1) 
               current_floor <= current_floor - 1;
       end else 
          delay <= delay + 1;
@@ -133,12 +133,12 @@ module segment7(
       1: segment = 7'b0000110;
       2: segment = 7'b1011011;
       3: segment = 7'b1001111;
-      4: segment = 7'b1100110; /*
+      4: segment = 7'b1100110; 
       5: segment = 7'b1101101;
       6: segment = 7'b1111101; 
       7: segment = 7'b0000111; 
       8: segment = 7'b1111111;
-      9: segment = 7'b1101111;*/
+      9: segment = 7'b1101111;
       default: segment = 7'b0000000;
     endcase
   end
