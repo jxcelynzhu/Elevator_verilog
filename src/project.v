@@ -29,8 +29,8 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .rst_n(rst_n),
-    //.requested_floor(ui_in[3:0]),
-    .requested_floor(4'd2),
+    .requested_floor(ui_in[3:0]),
+    //.requested_floor(4'd2),
     .current_floor(floor),
     .idle_display (uo_out [7])
   );
@@ -77,14 +77,14 @@ module elevator_state_machine (
        	idle_display  = 0;
  
         /* Next state is to move up if the currently accessed floor is below the 
-           desired floor. Also checks if the current floor is less than 5
+           desired floor
         */
-        if (current_floor < requested_floor && current_floor < 4'd5)
+        if (current_floor < requested_floor)
           next_state = MOVING_UP;
         /* Next state is to move down if the currently accessed floor is aboce the 
-           desired floor. Also checks if the current floor is greater than 0
+           desired floor
         */
-        else if (current_floor > requested_floor && current_floor > 4'd0)
+        else if (current_floor > requested_floor)
           next_state = MOVING_DOWN;
         /* Remains in idle state if the currently accessed floor is the same 
            as the desired floor */
@@ -101,16 +101,16 @@ module elevator_state_machine (
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
           current_state <= IDLE_STATE;
-          current_floor <= 0;
+          current_floor <= 1;
           delay <= 0;
     end else begin
       current_state <= next_state; //Update the current state
 
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
-        if (current_state == MOVING_UP) 
+        if (current_state == MOVING_UP && current_floor < 4) 
           current_floor <= current_floor + 1;
-        else if (current_state == MOVING_DOWN) 
+        else if (current_state == MOVING_DOWN && current_floor > 1) 
           current_floor <= current_floor - 1;
       end else 
          delay <= delay + 1;
