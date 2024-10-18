@@ -23,8 +23,7 @@ module tt_um_example (
   wire [3:0] floor;
  
   // List all unused inputs to prevent warnings
-
-  wire _unused = &{ena, ui_in[7:4], uio_in[7:0], uio_out[7:0], uio_oe[7:0], 1'b0};
+  wire _unused = &{ena, ui_in[7:4], uio_in[7:0], 1'b0};
 
   elevator_state_machine em (
     .clk(clk),
@@ -76,12 +75,10 @@ module elevator_state_machine (
       MOVING_UP, MOVING_DOWN: begin
        	idle_display  = 0;
 
-        if (current_floor < requested_floor)
-          next_state = MOVING_UP;
-        else if (current_floor > requested_floor)
-          next_state = MOVING_DOWN;
-        else
+       if (current_floor == requested_floor)
           next_state = IDLE_STATE;
+        else
+          next_state = MOVING_DOWN;
       end
       default:
         next_state = IDLE_STATE; // Error state, go back to IDLE
