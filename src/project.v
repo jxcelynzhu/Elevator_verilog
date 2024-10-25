@@ -46,14 +46,14 @@ module elevator_state_machine (
   input rst_n, // Reset signal inverted
   input wire [3:0] requested_floor,
   output reg [3:0] current_floor,
- // output reg idle_display 
+  output reg idle_display 
 );
 
   // Define the states
   parameter IDLE_STATE = 2'b00;
   parameter MOVING_UP = 2'b10;
   parameter MOVING_DOWN = 2'b11;
-  //parameter DUMMY_STATE = 2'b01;
+  parameter DUMMY_STATE = 2'b01;
   parameter DELAY_COUNT = 32'd10000000;  // make longer for real hardware
     
   // State register
@@ -63,8 +63,8 @@ module elevator_state_machine (
   // Combinational logic for next state and output
   always @(*) begin
     case (current_state)
-      IDLE_STATE/*, DUMMY_STATE*/: begin
-       	//idle_display = 1;
+      IDLE_STATE, DUMMY_STATE: begin
+       	idle_display = 1;
         if (current_floor < requested_floor)
           next_state = MOVING_UP;
         else if (current_floor > requested_floor)
@@ -73,7 +73,7 @@ module elevator_state_machine (
           next_state = IDLE_STATE;
       end
       MOVING_UP, MOVING_DOWN: begin
-       	//idle_display  = 0;
+       	idle_display  = 0;
           if (current_floor < requested_floor)
             next_state = MOVING_UP;
        else if (current_floor > requested_floor)
