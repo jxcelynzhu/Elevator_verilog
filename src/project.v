@@ -61,10 +61,7 @@ module elevator_state_machine (
   reg [31:0] delay;
 
   // Combinational logic for next state and output
-  always @(*) begin
-    // New:
-    next_state = current_state; // Default to current state
-    
+  always @(*) begin    
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
        	idle_display = 1;
