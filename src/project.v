@@ -28,8 +28,8 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .rst_n(rst_n),
-    .requested_floor(ui_in[3:0]),
-    //.requested_floor(4'd2),
+    //.requested_floor(ui_in[3:0]),
+    .requested_floor(4'd3),
     .current_floor(floor),
     .idle_display (uo_out [7])
   );
@@ -62,6 +62,10 @@ module elevator_state_machine (
 
   // Combinational logic for next state and output
   always @(*) begin
+    // New:
+    next_state = current_state; // Default to current state
+    idle_display = (current_state == IDLE_STATE); // Idle display logi
+    
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
        	idle_display = 1;
