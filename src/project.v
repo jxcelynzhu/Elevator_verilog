@@ -85,7 +85,6 @@ module elevator_state_machine (
         next_state = IDLE_STATE; // Error state, go back to IDLE
     endcase
   end
-    
   
   // Sequential logic 
     always @(posedge clk or negedge rst_n) begin
@@ -94,7 +93,17 @@ module elevator_state_machine (
           current_floor <= 0;
           delay <= 0;
     end else begin
-        
+      current_state <= next_state; //Update the current state
+
+        if (delay < DELAY_COUNT) begin
+            delay <= delay+1;
+        end else begin
+          delay <= 0; //Reset delay
+          if (current_state == MOVING_UP) 
+              current_floor <= current_floor + 1;
+          else if (current_state == MOVING_DOWN) 
+              current_floor <= current_floor - 1;
+        /*
       if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
           if (current_state == MOVING_UP) 
@@ -102,10 +111,8 @@ module elevator_state_machine (
           else if (current_state == MOVING_DOWN) 
               current_floor <= current_floor - 1;
           else
-              delay<=delay+1;
-    end 
-
-               current_state <= next_state; //Update the current state
+              delay<=delay+1;*/
+         end 
     end
   end
 endmodule
