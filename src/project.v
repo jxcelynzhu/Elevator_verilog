@@ -144,7 +144,7 @@ endmodule
 
 module bit_position_to_value (
     input wire [7:0] bit_in,
-    output reg bit_out
+    output reg [3:0] bit_out
 );
 
     always @(*) begin
