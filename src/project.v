@@ -64,7 +64,6 @@ module elevator_state_machine (
   always @(*) begin
     // New:
     next_state = current_state; // Default to current state
-    idle_display = (current_state == IDLE_STATE); // Idle display logi
     
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
