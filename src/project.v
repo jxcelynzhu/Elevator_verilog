@@ -93,18 +93,18 @@ module elevator_state_machine (
           current_floor <= 0;
           delay <= 0;
     end else begin
-      current_state <= next_state; //Update the current state
         
-      if (delay == DELAY_COUNT) begin
+     if (delay == DELAY_COUNT) begin
         delay <= 0; //Reset delay
-          if (current_state == MOVING_UP) 
-              current_floor <= current_floor + 1;
-          else if (current_state == MOVING_DOWN) 
-              current_floor <= current_floor - 1;
-          else
-              delay<=delay+1;
-         end 
+        if (current_state == MOVING_UP) 
+          current_floor <= current_floor + 1;
+        else if (current_state == MOVING_DOWN) 
+          current_floor <= current_floor - 1;
+      end else 
+         delay <= delay + 1;
     end
+
+              current_state <= next_state; //Update the current state
   end
 endmodule
 
