@@ -21,14 +21,21 @@ module tt_um_example (
   assign uio_oe  = 0;
  
   wire [3:0] floor;
+  wire [3:0] requested_floor;
+    
  
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, ui_in[7:4], uio_in[7:0], 1'b0};
+  wire _unused = &{ena, uio_in[7:0], 1'b0};
+    
+    bit_position_to_value b_pos(
+        .bit_in(ui_in),
+        .bit_out(requested_floor)
+    );
 
   elevator_state_machine em (
     .clk(clk),
     .rst_n(rst_n),
-    .requested_floor(ui_in[3:0]),
+    .requested_floor(requested_floor),
     //.requested_floor(4'd3),
     .current_floor(floor),
     .idle_display (uo_out [7])
@@ -38,6 +45,7 @@ module tt_um_example (
     .floor(floor),
     .segment(uo_out[6:0])
   );
+  
 endmodule
 
 
@@ -132,4 +140,26 @@ module segment7(
     endcase
   end
   
+endmodule
+
+module bit_position_to_value (
+    input wire [7:0] bit_in,
+    output reg bit_out
+);
+
+    always @(*) begin
+        case(bit_in)
+            8'b00000000: bit_out = 0;
+            8'b00000001: bit_out = 1;
+            8'b00000010: bit_out = 2;
+            8'b00000100: bit_out = 3;
+            8'b00001000: bit_out = 4;
+            8'b00010000: bit_out = 5;
+            8'b00100000: bit_out = 6;
+            8'b01000000: bit_out = 7;
+            8'b10000000: bit_out = 8;
+         default:
+            bit_out = 0;
+         endcase              
+    end
 endmodule
