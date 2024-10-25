@@ -28,8 +28,8 @@ module tt_um_example (
   elevator_state_machine em (
     .clk(clk),
     .rst_n(rst_n),
-    //.requested_floor(ui_in[3:0]),
-    .requested_floor(4'd3),
+    .requested_floor(ui_in[3:0]),
+    //.requested_floor(4'd3),
     .current_floor(floor),
     .idle_display (uo_out [7])
   );
