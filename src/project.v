@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2024 Jocelyn Zhu
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -22,7 +22,6 @@ module tt_um_example (
  
   wire [3:0] floor;
   wire [3:0] requested_floor;
-    
  
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, uio_in[7:0], 1'b0};
@@ -36,7 +35,7 @@ module tt_um_example (
     .clk(clk),
     .rst_n(rst_n),
     .requested_floor(requested_floor),
-    //.requested_floor(4'd3),
+      //.requested_floor(4'd3), 
     .current_floor(floor),
     .idle_display (uo_out [7])
   );
@@ -68,57 +67,56 @@ module elevator_state_machine (
   reg [1:0] current_state, next_state;
   reg [31:0] delay;
 
-  // Combinational logic for next state and output
+  // Combinational logic: Determining elevator state based on the current state and floor requests
   always @(*) begin    
     case (current_state)
       IDLE_STATE, DUMMY_STATE: begin
        	idle_display = 1;
         if (current_floor < requested_floor)
-          next_state = MOVING_UP;
+          next_state = MOVING_UP; // The elevator starts moving up
         else if (current_floor > requested_floor)
-          next_state = MOVING_DOWN;
+          next_state = MOVING_DOWN; // The elevator starts moving down
         else
-          next_state = IDLE_STATE;
+          next_state = IDLE_STATE; // Remain in idle state if the requested floor is already reached
       end
       MOVING_UP, MOVING_DOWN: begin
        	idle_display  = 0;
        if (current_floor < requested_floor)
-            next_state = MOVING_UP;
+            next_state = MOVING_UP; // The elevator continues to move up
        else if (current_floor > requested_floor)
-           next_state = MOVING_DOWN;
+           next_state = MOVING_DOWN; // The elevator continues to move down
        else 
-          next_state = IDLE_STATE;
+          next_state = IDLE_STATE; // Idle state when the requested floor is reached
       end
       default:
-        next_state = IDLE_STATE; // Error state, go back to IDLE
+        next_state = IDLE_STATE; // Error state, resets to IDLE
     endcase
   end
   
-    // Sequential logic 
-        always @(posedge clk or negedge rst_n) begin
-            if ( ~rst_n ) begin
-              current_state <= IDLE_STATE;
-              current_floor <= 0;
-              delay <= 0;
-        end else begin
-          current_state <= next_state; //Update the current state
-            
-          //Update the current_floor
-          if (delay == DELAY_COUNT) begin
-            delay <= 0; //Reset delay
-            if (current_state == MOVING_UP) 
-              current_floor <= current_floor + 1;
-            else if (current_state == MOVING_DOWN) 
-              current_floor <= current_floor - 1;
-          end else 
-             delay <= delay + 1;  //increment delay counter
-        end
-      end
+// Sequential logic: Updating the current state and floor 
+always @(posedge clk or negedge rst_n) begin
+    if ( ~rst_n ) begin
+      current_state <= IDLE_STATE;
+      current_floor <= 0;
+      delay <= 0;
+end else begin
+  current_state <= next_state; // Update the current state
+    
+  //Update the current floor based on the elevator's state and delay
+  if (delay == DELAY_COUNT) begin
+    delay <= 0; 
+    if (current_state == MOVING_UP) 
+      current_floor <= current_floor + 1; // Increments current floor when the elevator is moving up
+    else if (current_state == MOVING_DOWN) 
+      current_floor <= current_floor - 1;  // Decrements current floor when the elevator is moving down
+  end else 
+     delay <= delay + 1;  
+end
+end
 endmodule
 
 
 // 7-segment display
-
 module segment7(
   input wire [3:0] floor, // 4 bit input to display digits < 10
   output reg [6:0] segment // 7 bit output for 7-segment display
@@ -142,6 +140,7 @@ module segment7(
   
 endmodule
 
+// Converting bit position to decimal value
 module bit_position_to_value (
     input wire [7:0] bit_in,
     output reg [3:0] bit_out
