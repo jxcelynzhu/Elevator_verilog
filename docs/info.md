@@ -6,4 +6,4 @@ The user selects a floor using the board switches, and the display increments/de
 Use board switches 0-7 to select the desired floor. 
 
 ## External hardware
-An LED display is used to show elevator operation and the selected floor number.
+A LED display is used to show elevator operation and the selected floor number.
