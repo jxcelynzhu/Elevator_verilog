@@ -39,7 +39,7 @@ pinout:
   uo[4]: "Segment E"
   uo[5]: "Segment F"
   uo[6]: "Segment G"
-  uo[7]: "Dot that appears in the IDLE state"
+  uo[7]: "A dot that appears during the IDLE state"
 
   # Bidirectional pins
   uio[0]: ""
