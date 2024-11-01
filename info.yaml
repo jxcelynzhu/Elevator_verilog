@@ -2,8 +2,8 @@
 project: 
   title:        "Elevator Design"      # Project title
   author:       "Jocelyn Zhu"      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Implementing elevator design onto digital clock."      # One line description of what your project does
+  discord:      "jocelyn0358"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  description:  "Simulation of an elevator design on a digital clock display."      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -22,24 +22,24 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "x"
-  ui[1]: "x"
-  ui[2]: "x"
-  ui[3]: "x"
-  ui[4]: "x"
-  ui[5]: "x"
-  ui[6]: "x"
-  ui[7]: "x"
+  ui[0]: "Switch 0"
+  ui[1]: "Switch 1"
+  ui[2]: "Switch 2"
+  ui[3]: "Switch 3"
+  ui[4]: "Switch 4"
+  ui[5]: "Switch 5"
+  ui[6]: "Switch 6"
+  ui[7]: "Switch 7"
 
   # Outputs
-  uo[0]: "x"
-  uo[1]: "x"
-  uo[2]: "x"
-  uo[3]: "x"
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "Segment A"
+  uo[1]: "Segment B"
+  uo[2]: "Segment C"
+  uo[3]: "Segment D"
+  uo[4]: "Segment E"
+  uo[5]: "Segment F"
+  uo[6]: "Segment G"
+  uo[7]: "Dot that appears in the IDLE state"
 
   # Bidirectional pins
   uio[0]: ""
